@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/ALV.dir/avl.cpp.o -o ALV
