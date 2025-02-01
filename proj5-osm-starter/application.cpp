@@ -10,9 +10,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
 #include "dist.h"
 #include "graph.h"
-
 #include "json.hpp"
 
 using namespace std;
@@ -20,20 +20,20 @@ using json = nlohmann::json;
 
 double INF = numeric_limits<double>::max();
 
-void buildGraph(istream& input, graph<long long, double>& g, vector<BuildingInfo>& buildings) {
-
+void buildGraph(istream& input, graph<long long, double>& g,
+                vector<BuildingInfo>& buildings) {
   json j;
   input >> j;
 
-  unordered_map<long long, Coordinates> waypointCoordinates;
+  unordered_map<long long, Coordinates> waypCoords;
 
   if (j.contains("waypoints") && j["waypoints"].is_array()) {
-    for (const auto& waypoint : j["waypoints"]) {
-      long long id = waypoint["id"];
-      double lat = waypoint["lat"];
-      double lon = waypoint["lon"];
+    for (const auto& wayp : j["waypoints"]) {
+      long long id = wayp["id"];
+      double lat = wayp["lat"];
+      double lon = wayp["lon"];
       Coordinates coords(lat, lon);
-      waypointCoordinates[id] = coords;
+      waypCoords[id] = coords;
 
       g.addVertex(id);
     }
@@ -46,8 +46,8 @@ void buildGraph(istream& input, graph<long long, double>& g, vector<BuildingInfo
           long long id1 = footway[i];
           long long id2 = footway[i + 1];
 
-          Coordinates coord1 = waypointCoordinates[id1];
-          Coordinates coord2 = waypointCoordinates[id2];
+          Coordinates coord1 = waypCoords[id1];
+          Coordinates coord2 = waypCoords[id2];
 
           double dist = distBetween2Points(coord1, coord2);
           g.addEdge(id1, id2, dist);
@@ -72,13 +72,13 @@ void buildGraph(istream& input, graph<long long, double>& g, vector<BuildingInfo
   }
 
   for (const auto& building : buildings) {
-    for (const auto& waypoint : j["waypoints"]) {
+    for (const auto& wayp : j["waypoints"]) {
       double distance = distBetween2Points(
           Coordinates(building.location.lat, building.location.lon),
-          Coordinates(waypoint["lat"], waypoint["lon"]));
+          Coordinates(wayp["lat"], wayp["lon"]));
       if (distance <= 0.036) {
-        g.addEdge(building.id, waypoint["id"], distance);
-        g.addEdge(waypoint["id"], building.id, distance);
+        g.addEdge(building.id, wayp["id"], distance);
+        g.addEdge(wayp["id"], building.id, distance);
       }
     }
   }
@@ -112,64 +112,76 @@ BuildingInfo getClosestBuilding(const vector<BuildingInfo>& buildings,
   return ret;
 }
 
-vector<long long> dijkstra (const graph<long long, double>& G, long long start, long long target, const set<long long>& ignoreNodes) {
-
-  // Inline comp for the priority queue
-  auto comp = [](const pair<long long, double>& p1, const pair<long long, double>& p2) {
-    return p1.second > p2.second;
+vector<long long> dijkstra(const graph<long long, double>& G, long long start,
+                           long long target,
+                           const set<long long>& ignoreNodes) {
+  // Comparator for priority queue to order pairs based on the second element
+  // (usually distance or weight).
+  // The lambda function compares the second element of two pairs (lhs and rhs),
+  // which represent a long long (usually a vertex or node) and a double
+  // (typically a weight or distance). The comparator ensures that pairs with
+  // smaller second elements (distances/weights) are given higher priority,
+  // meaning they will be processed first in the priority queue.
+  auto comparator = [](const pair<long long, double>& lhs,
+                       const pair<long long, double>& rhs) {
+    return lhs.second > rhs.second;
   };
 
-  priority_queue<pair<long long, double>, vector<pair<long long, double>>, decltype(comp) > worklist(comp);
+  priority_queue<pair<long long, double>, vector<pair<long long, double>>,
+                 decltype(comparator)>
+      pq(comparator);
 
-  unordered_map<long long, double> dist;
-  unordered_map<long long, long long> prev;
+  unordered_map<long long, double> distances;
+  unordered_map<long long, long long> predecessors;
 
-  // Initialize distances to infinity
-  for (const auto& vertex : G.getVertices()) {
-    dist[vertex] = INF;
+  // Set initial distances to infinity
+  for (const long long& vertex : G.getVertices()) {
+    distances[vertex] = INF;
   }
-  dist[start] = 0;
-  worklist.push({start, 0});
 
-  while (!worklist.empty()) {
-    auto [current, currentDist] = worklist.top();
-    worklist.pop();
+  distances[start] = 0;
+  pq.push({start, 0});
 
-    // Skip ignored nodes
-    if (ignoreNodes.count(current) && current != start && current != target) {
+  while (!pq.empty()) {
+    auto [node, nodeDist] = pq.top();
+    pq.pop();
+
+    // Skip nodes that should be ignored
+    if (ignoreNodes.count(node) && node != start && node != target) {
       continue;
     }
 
-    // If target is reached, reconstruct the path
-    if (current == target) {
+    // Path reconstruction if target reached
+    if (node == target) {
       vector<long long> path;
-      for (long long v = target; v != start; v = prev[v]) {
-        path.push_back(v);
+      while (node != start) {
+        path.push_back(node);
+        node = predecessors[node];
       }
       path.push_back(start);
       reverse(path.begin(), path.end());
       return path;
     }
 
-    // Explore neighbors
-    for (const auto& neighbor : G.neighbors(current)) {
+    // Process neighbors
+    for (const long long& neighbor : G.neighbors(node)) {
       double edgeWeight;
-      if (G.getWeight(current, neighbor, edgeWeight)) {
-        double newDist = currentDist + edgeWeight;
-        if (newDist < dist[neighbor]) {
-          dist[neighbor] = newDist;
-          prev[neighbor] = current;
-          worklist.push({neighbor, newDist});
+      if (G.getWeight(node, neighbor, edgeWeight)) {
+        double alternativeDist = nodeDist + edgeWeight;
+        if (alternativeDist < distances[neighbor]) {
+          distances[neighbor] = alternativeDist;
+          predecessors[neighbor] = node;
+          pq.push({neighbor, alternativeDist});
         }
       }
     }
   }
 
-  return {};
+  return {};  // Return empty if no path exists
 }
 
-double pathLength(const graph<long long, double>& G, const vector<long long>& path) {
-
+double pathLength(const graph<long long, double>& G,
+                  const vector<long long>& path) {
   double length = 0.0;
   double weight;
   for (size_t i = 0; i + 1 < path.size(); i++) {
@@ -192,9 +204,9 @@ void outputPath(const vector<long long>& path) {
   cout << endl;
 }
 
-void application(const vector<BuildingInfo>& buildings, const graph<long long, double>& G) {
-
-  string person1Building, person2Building;
+void application(const vector<BuildingInfo>& buildings,
+                 const graph<long long, double>& G) {
+  string p1building, p2building;
 
   set<long long> buildingNodes;
   for (const auto& building : buildings) {
@@ -203,15 +215,15 @@ void application(const vector<BuildingInfo>& buildings, const graph<long long, d
 
   cout << endl;
   cout << "Enter person 1's building (partial name or abbreviation), or #> ";
-  getline(cin, person1Building);
+  getline(cin, p1building);
 
-  while (person1Building != "#") {
+  while (p1building != "#") {
     cout << "Enter person 2's building (partial name or abbreviation)> ";
-    getline(cin, person2Building);
+    getline(cin, p2building);
 
     // Look up buildings by query
-    BuildingInfo p1 = getBuildingInfo(buildings, person1Building);
-    BuildingInfo p2 = getBuildingInfo(buildings, person2Building);
+    BuildingInfo p1 = getBuildingInfo(buildings, p1building);
+    BuildingInfo p2 = getBuildingInfo(buildings, p2building);
     Coordinates P1Coords, P2Coords;
     string P1Name, P2Name;
 
@@ -268,6 +280,6 @@ void application(const vector<BuildingInfo>& buildings, const graph<long long, d
     //
     cout << endl;
     cout << "Enter person 1's building (partial name or abbreviation), or #> ";
-    getline(cin, person1Building);
+    getline(cin, p1building);
   }
 }

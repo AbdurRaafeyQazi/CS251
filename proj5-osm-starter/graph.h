@@ -20,11 +20,12 @@ class graph {
   graph() = default;
 
   bool addVertex(VertexT v) {
-    if (adjLst.find(v) != adjLst.end()) return false;
+    auto result = adjLst.insert({v, {}});  // List style
+    if (!result.second) {
+      return false;
+    }
 
-    adjLst[v] = {};
     ++vertexCount;
-
     return true;
   }
 
@@ -52,28 +53,28 @@ class graph {
   }
 
   set<VertexT> neighbors(VertexT v) const {
-    set<VertexT> S;
+    set<VertexT> result;
     auto it = adjLst.find(v);
 
     if (it == adjLst.end()) {
-      return S;
+        return result;  // Return empty set if vertex is not found
     }
 
-    for (const auto& [neighbor, _] : it->second) {
-      S.insert(neighbor);
+    for (auto edge = it->second.begin(); edge != it->second.end(); ++edge) {
+        result.insert(edge->first);
     }
 
-    return S;
+    return result;
   }
 
   vector<VertexT> getVertices() const {
-    vector<VertexT> vertices;
-
-    for (const auto& [vertex, _] : adjLst) {
-      vertices.push_back(vertex);
+    vector<VertexT> vertexList;
+    
+    for (typename unordered_map<VertexT, unordered_map<VertexT, WeightT>>::const_iterator it = adjLst.begin(); it != adjLst.end(); ++it) {
+        vertexList.push_back(it->first);
     }
 
-    return vertices;
+    return vertexList;
   }
 
   size_t numVertices() const {

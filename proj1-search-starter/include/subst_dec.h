@@ -35,3 +35,5 @@ void computeEnglishnessCommand(const QuadgramScorer& scorer);
  * Non-letter characters should be preserved.
  */
 void decryptSubstCipherCommand(const QuadgramScorer& scorer);
+
+
