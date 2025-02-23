@@ -1,31 +1,67 @@
-CS251 - Data Structures and Algorithms
-Author: Abdur Raafey Qazi
-📌 Overview
-This repository contains my coursework for CS251: Data Structures and Algorithms at the University of Illinois Chicago (UIC). It includes various labs and projects that explore fundamental and advanced data structures, algorithms, and their applications in C++.
+# CS251 - Data Structures Labs & Projects
 
-📂 Repository Structure
-Labs
-The labs introduce and reinforce key data structures and algorithms, with hands-on implementation. Each lab focuses on different concepts such as:
+## Overview
+This repository contains all the labs and projects for CS251 (Data Structures) at the University of Illinois Chicago (UIC). It serves as a structured collection of starter code, notes, and completed assignments that explore fundamental and advanced data structures and algorithms.
 
-Lab 01-12: Linked lists, stacks, queues, trees, heaps, hash tables, graphs, and sorting algorithms.
-Projects
-The projects are more in-depth implementations that require problem-solving and efficiency optimizations:
+## Repository Structure
+The repository is organized into different directories, each corresponding to a specific lab or project:
 
-Project 1 (Search Algorithms) – Implementation of binary search and other search techniques.
-Project 2 (Graph Search) – BFS & DFS traversal in graphs.
-Project 3 (Canvas List) – Custom implementation of a linked list-based UI system.
-Project 4 (Priority Queue - BST) – Implementation of a priority queue using a binary search tree.
-Project 5 (OpenStreetMap Routing) – Utilizing graph algorithms for pathfinding in real-world maps.
-🛠️ Technologies Used
-Programming Language: C++
-Concepts Covered: Data Structures, Algorithms, Object-Oriented Programming, Graph Theory, Trees, Sorting & Searching Algorithms
+### **Labs**
+These are structured exercises focusing on fundamental data structures and algorithmic concepts:
+- `lab01-starter` - Introduction to C++ and basic data structures
+- `lab02-starter` - Linked Lists and memory management
+- `lab03-starter` - Stacks and Queues implementation
+- `lab06-starter` - Binary Search Trees (BSTs)
+- `lab09-starter` - AVL Trees and self-balancing properties
+- `lab10-starter` - Graph representations and basic graph algorithms
+- `lab11-starter` - Graph traversal techniques (BFS & DFS)
+- `lab12-starter` - Advanced tree structures and applications
 
-🚀 How to Use
-Clone this repository and navigate to a specific lab or project folder:
+### **Projects**
+Larger, more comprehensive assignments that apply multiple concepts from the course:
+- `proj1-search-starter` - Implementation of search algorithms (linear & binary search)
+- `proj2-search-starter` - Advanced search techniques and optimizations
+- `proj3-canvaslist-starter` - Implementation of a linked list-based graphical application
+- `proj4-prqueue-starter` - Implementation of a priority queue using a binary search tree
+- `proj5-osm-starter` - Working with OpenStreetMap (OSM) data structures and algorithms
+- `p5cpy` - Additional implementation related to Project 5
+
+### **Notes**
+- `notes` - Contains lecture notes and additional study materials for reference
+
+## Getting Started
+### **Cloning the Repository**
+To clone the repository, run:
+```sh
 git clone https://github.com/AbdurRaafeyQazi/CS251.git
-cd CS251
+```
 
-Follow the provided instructions in each folder to compile and run the programs.
+### **Compiling & Running Code**
+Each lab and project has its own `Makefile` or build instructions. Navigate to the respective directory and compile using:
+```sh
+make
+./program_name
+```
 
-📌 Key Learnings
-Through these assignments, I strengthened my knowledge of efficient data structures, memory management, algorithmic problem-solving, and C++ programming best practices.
+Alternatively, if a Makefile is not provided, compile using g++:
+```sh
+g++ -o output_file source_file.cpp
+./output_file
+```
+
+### **Dependencies**
+Most projects are written in C++ and require a standard compiler such as `g++`. If you are using Linux or macOS, install it with:
+```sh
+sudo apt install g++   # Ubuntu/Debian
+yum install gcc-c++    # Fedora
+brew install gcc       # macOS
+```
+
+## Contributions
+This repository is maintained for personal reference and learning purposes. Contributions are welcome through pull requests if they align with the course material.
+
+## License
+This repository is for educational purposes and follows UIC's academic integrity policies. Do not submit this code as your own work in the course.
+
+---
+Maintained by **FurioSwordsman**
